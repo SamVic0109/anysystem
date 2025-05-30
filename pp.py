@@ -1,4 +1,6 @@
 import os
+from datetime import datetime
+logs = []
 current_user = None
 users = {}
 admin_users = {"Admin": "Admin@1234"}  
@@ -8,11 +10,27 @@ def limpar():
 
 def espera():
     input("Pressione qualquer tecla para continuar...")
+
+def log_login():
+    logs.append({
+        
+        "Usuário: " : current_user,
+        "Ação: " : "Login Realizado",
+        "Hora: " : datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+    })
+    
+def log_logoff():
+    logs.append({
+        "Usuário: " : current_user,
+        "Ação: " : "LogOff",
+        "Hora: " : datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+    })
     
 def main_admin():
     while True:
         limpar()
         print(f"Sessão iniciada com: {current_user}")
+        
         save = False
 
         print('|--------------------------------------|')
@@ -22,12 +40,13 @@ def main_admin():
         print('| b) Adicionar Usuário                 |')      
         print('| c) Remover Usuário                   |')
         print('| d) Pesquisar Usuário                 |')
-        print('| e) Sair                              |') 
+        print('| e) Ver logs                          |') 
+        print('| f) Sair                              |')
         print('|--------------------------------------|')
         option = (str(input('TECLE A OPÇÃO: '))).strip().lower()
 
         # filtragem de entrada
-        if len(option) != 1 or option not in "abcde":
+        if len(option) != 1 or option not in "abcdef":
             print("Opção inválida")
         elif option == "a":
             if users:
@@ -59,6 +78,12 @@ def main_admin():
                             elif confirm != "n":
                                 users[nome] = cpf
                                 print("USUÁRIO ADICIONADO COM SUCESSO")
+                                logs.append({
+                                "Usuário: " : current_user,
+                                "Ação: " : "Criação de usuário",
+                                "Usuário adicionado: " : nome,
+                                "Hora: " : datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+                                })
                                 espera()
                                 save = True
                     elif is_adm != "n":
@@ -73,6 +98,12 @@ def main_admin():
                             elif confirm == 's':
                                 admin_users[nome] = senha
                                 print("Usuário adicionado com sucesso!")
+                                logs.append({
+                                "Usuário: " : current_user,
+                                "Ação: " : "Criação de usuário",
+                                "Usuário adicionado: " : nome,
+                                "Hora: " : datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+                                })
                                 input("Pressione qualquer tecla para continuar...")
                                 save = True
                                     
@@ -89,6 +120,12 @@ def main_admin():
                 if confirm == 's':
                     del users[nome]
                     print("Usuário removido com sucesso.")
+                    logs.append({
+                        "Usuário: " : current_user,
+                        "Ação: " : "Exclusão de usuário",
+                        "Usuário excluído: " : nome,
+                        "Hora: " : datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+                    })
                     espera()
                 else:
                     print("Remoção cancelada.")
@@ -113,6 +150,15 @@ def main_admin():
                 print("Usuário não encontrado")
                 espera()
         elif option == 'e':
+            limpar()
+            print("\n=== LOGS DO SISTEMA ===\n")
+            for log in logs:
+                for chave, valor in log.items():
+                    print(f"{chave} {valor}")
+                print("-" * 40)
+            espera()
+        elif option == 'f':
+            log_logoff()
             login()
 
 def main_normal():
@@ -145,11 +191,13 @@ def login():
                 current_user = user_name
                 limpar()
                 main_admin()
+                log_login()
                 login_sucess = True
             elif (user_name in users and user_password == users[user_name]):
                 print("Login usuário efetuado!")
                 limpar()
                 main_normal()
+                log_login()
                 login_sucess = True
             else:
                 print("Usuário ou senha incorretos!")
